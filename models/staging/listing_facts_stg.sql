@@ -16,6 +16,7 @@ renamed as (
     select
         LISTING_ID,
         SCRAPED_DATE,
+        HOST_ID,
         PRICE,
         HAS_AVAILABILITY,
         AVAILABILITY_30,
@@ -25,8 +26,7 @@ renamed as (
         REVIEW_SCORES_CLEANLINESS,
         REVIEW_SCORES_CHECKIN,
         REVIEW_SCORES_COMMUNICATION,
-        REVIEW_SCORES_VALUE,
-        ingestion_datetime
+        REVIEW_SCORES_VALUE
     from source
 )
 
