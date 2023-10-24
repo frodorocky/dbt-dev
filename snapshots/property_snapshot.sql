@@ -9,6 +9,13 @@
                )
     }}
 
-select * from {{ source('raw', 'property') }}
+select 
+  LISTING_ID,
+	LISTING_NEIGHBOURHOOD,
+  PROPERTY_TYPE,
+  ROOM_TYPE,
+  ACCOMMODATES,
+  SCRAPED_DATE
+from {{ source('raw', 'listing') }}
 
 {% endsnapshot %}

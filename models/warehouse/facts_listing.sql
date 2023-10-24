@@ -6,18 +6,10 @@
 
 with check_dimensions as
 (select
-	LISTING_ID,
-	SCRAPE_ID,
-	SCRAPED_DATE,
-	HOST_ID,
-	HOST_NAME,
-	HOST_SINCE,
-	HOST_IS_SUPERHOST,
-	HOST_NEIGHBOURHOOD,
-	case when UPPER(LISTING_NEIGHBOURHOOD) in (select distinct SUBURB_NAME from {{ ref('nsw_lga_suburb_stg') }}) then UPPER(LISTING_NEIGHBOURHOOD) else 'unkonwn' end as LISTING_NEIGHBOURHOOD,
-	PROPERTY_TYPE,
-	ROOM_TYPE,
-	ACCOMMODATES,
+	case when listing_id in (select distinct listing_id from {{ ref('property_stg') }}) then listing_id else 0 end as listing_id,
+	case when LISTING_NEIGHBOURHOOD in (select distinct SUBURB_NAME from {{ ref('lga_suburb_stg') }}) then LISTING_NEIGHBOURHOOD else 'unknown' end as LISTING_NEIGHBOURHOOD,
+	case when HOST_ID in (select distinct HOST_ID from {{ ref('host_info_stg') }}) then HOST_ID else 0 end as HOST_ID,
+	DATE,
 	PRICE,
 	HAS_AVAILABILITY,
 	AVAILABILITY_30,
@@ -27,14 +19,30 @@ with check_dimensions as
 	REVIEW_SCORES_CLEANLINESS,
 	REVIEW_SCORES_CHECKIN,
 	REVIEW_SCORES_COMMUNICATION,
-	REVIEW_SCORES_VALUE,
-	ingestion_datetime
-from {{ ref('airbnb_listing_stg') }})
+	REVIEW_SCORES_VALUE
+from {{ ref('listing_stg') }})
 
 select
-	a.*,
-	b.LGA_NAME,
-	c.LGA_CODE,
+	a.listing_id,
+	a.LISTING_NEIGHBOURHOOD,
+	a.DATE,
+	a.PRICE,
+	a.HAS_AVAILABILITY,
+	a.AVAILABILITY_30,
+	a.NUMBER_OF_REVIEWS,
+	a.REVIEW_SCORES_RATING,
+	a.REVIEW_SCORES_ACCURACY,
+	a.REVIEW_SCORES_CLEANLINESS,
+	a.REVIEW_SCORES_CHECKIN,
+	a.REVIEW_SCORES_COMMUNICATION,
+	a.REVIEW_SCORES_VALUE,
+	b.HOST_NAME,
+    b.HOST_SINCE,
+    b.HOST_IS_SUPERHOST,
+    b.HOST_NEIGHBOURHOOD,
+	c.PROPERTY_TYPE,
+    c.ROOM_TYPE,
+    c.ACCOMMODATES,
     g1.Tot_P_M,
 	g1.Tot_P_F,
 	g1.Tot_P_P,
@@ -151,11 +159,14 @@ select
 	g2.Average_num_psns_per_bedroom,
 	g2.Median_tot_hhd_inc_weekly,
 	g2.Average_household_size
-from check_dimensions a
-LEFT JOIN nsw_lga_suburb_stg AS b ON UPPER(a.LISTING_NEIGHBOURHOOD) = b.SUBURB_NAME
-LEFT JOIN nsw_lga_code_stg AS c ON b.LGA_NAME = c.LGA_NAME 
-LEFT JOIN census_g01_nsw_lga_stg AS g1 ON c.LGA_CODE = g1.LGA_CODE
-LEFT JOIN census_g02_nsw_lga_stg AS g2 ON c.LGA_CODE = g2.LGA_CODE
+from check_dimensions as a
+lEFT JOIN staging.host_info_stg as b on a.host_id = b.host_id and a.DATE::timestamp between b.dbt_valid_from and coalesce(to_timestamp(b.dbt_valid_to, 'YYYY-MM-DD HH24:MI:SS'), '9999-12-31 23:59:59'::timestamp)
+LEFT JOIN staging.property_stg as c on a.listing_id = c.listing_id and a.DATE::timestamp between b.dbt_valid_from and coalesce(to_timestamp(b.dbt_valid_to, 'YYYY-MM-DD HH24:MI:SS'), '9999-12-31 23:59:59'::timestamp)
+LEFT JOIN staging.lga_suburb_stg AS d ON a.LISTING_NEIGHBOURHOOD = d.SUBURB_NAME
+LEFT JOIN staging.lga_code_stg AS e ON e.LGA_NAME = d.LGA_NAME 
+LEFT JOIN staging.census_g01_stg AS g1 ON e.LGA_CODE = g1.LGA_CODE
+LEFT JOIN staging.census_g02_stg AS g2 ON e.LGA_CODE = g2.LGA_CODE
+
 
 
 

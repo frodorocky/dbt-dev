@@ -4,4 +4,6 @@
     )
 }}
 
-select * from {{ ref('census_g01_nsw_lga_stg') }}
+select 
+    *
+    from {{ ref('census_g01_stg') }}

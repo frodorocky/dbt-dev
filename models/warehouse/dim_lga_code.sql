@@ -4,4 +4,6 @@
     )
 }}
 
-select * from {{ ref('nsw_lga_code_stg') }}
+select 
+    *
+    from {{ ref('lga_code_stg') }}

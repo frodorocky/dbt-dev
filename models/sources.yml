@@ -9,6 +9,4 @@ sources:
       - name: census_g02_nsw_lga
       - name: nsw_lga_suburb
       - name: nsw_lga_code
-      - name: host_info
-      - name: property
-      - name: listing_facts
+      - name: listing
