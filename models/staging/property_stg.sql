@@ -15,8 +15,8 @@ source  as (
 renamed as (
     select
         LISTING_ID,
-        SCRAPED_DATE,
-        LISTING_NEIGHBOURHOOD,
+        TO_DATE(SCRAPED_DATE, 'YYYY-MM-DD') as DATE,
+        upper(LISTING_NEIGHBOURHOOD) as LISTING_NEIGHBOURHOOD,
         PROPERTY_TYPE,
         ROOM_TYPE,
         ACCOMMODATES,
@@ -36,7 +36,7 @@ renamed as (
 unknown as (
     select
         0 as LISTING_ID,
-        'unknown' as SCRAPED_DATE,
+        NULL::timestamp as DATE,
         'unknown' as LISTING_NEIGHBOURHOOD,
         'unknown' as PROPERTY_TYPE,
         'unknown' as ROOM_TYPE,

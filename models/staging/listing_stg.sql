@@ -8,15 +8,16 @@ with
 
 source  as (
 
-    select * from "postgres"."raw"."listing_facts"
+    select * from "postgres"."raw"."listing"
 
 ),
 
 renamed as (
     select
         LISTING_ID,
-        SCRAPED_DATE,
+        upper(LISTING_NEIGHBOURHOOD) as LISTING_NEIGHBOURHOOD,
         HOST_ID,
+        TO_DATE(SCRAPED_DATE, 'YYYY-MM-DD') as DATE,
         PRICE,
         HAS_AVAILABILITY,
         AVAILABILITY_30,
